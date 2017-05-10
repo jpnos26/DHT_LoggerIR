@@ -21,8 +21,8 @@ Connect DHT21 / AMS2301 at GPIO2
 #include "irl.h"
 
 // WiFi connection
-const char* ssid = "home";
-const char* password = "marzia2009";
+const char* ssid = "ap";
+const char* password = "pwd";
 
 // ntp timestamp
 unsigned long ulSecs2000_timer=0;
@@ -57,7 +57,7 @@ WiFiServer server(80);
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 
 // init DHT; 3rd parameter = 16 works for ESP8266@80MHz
-DHT dht(DHTPIN, DHTTYPE,16); 
+DHT dht(DHTPIN, DHTTYPE,30); 
 
 // needed to avoid link error on ram check
 extern "C" 
@@ -519,7 +519,8 @@ void loop()
     sResponse += epoch_to_string(pulTime[iIndex]).c_str();
     sResponse += F(" <BR></p>\n<div style=\"width:400px; margin:0 auto\">\n<div id=\"gaugetemp_div\" style=\"float:left; width:200px; height: 200px\"></div> \n<div id=\"gaugehum_div\" style=\"float:left; width:200px; height: 200px\"></div>\n<div style=\"clear:both\"></div>\n</div>");
     
-    sResponse2 = F("<p align=\"center\">Tabella e Grafici del Logger:<BR><a href=\"/grafico\">Grafico</a>     <a href=\"/tabella\">Tabella</a> <a href=\"/IrDecoder\">IrDecoder</a></p>");
+    sResponse2 +=F("<p style=\"text-align: center;\"><input name=\"grafico\" type=\"button\"  onclick=\"location.href= '/grafico'\"  value=\"Grafico\" />&nbsp; <input name=\"tabella\" type=\"button\" value=\"Tabella\" onclick=\"location.href= '/tabella'\"/>&nbsp; <input name=\"Irdecoder\" type=\"button\" value=\"IrDecoder\" onclick=\"location.href= '/IrDecoder'\"/>&nbsp; <input name=\"IrSender\" type=\"button\" value=\"IrSEnder\" onclick=\"location.href= '/IrSender'\"/></p>\r\n");
+
     sResponse2 += MakeHTTPFooter().c_str();
     
     // Send the response to the client 
@@ -626,31 +627,99 @@ void loop()
     irRead = 1;
 
   }
-   
-   else if(sPath=="/IrSendUP")
+   ///////////////////////////////////
+  // format the html page for Sender IR
   ///////////////////////////////////
-  // format the html page for /irDecoder 
-  ///////////////////////////////////
-  {
+  else if(sPath=="/IrSender")
+    {
+    ulReqcount++;
+    sResponse = file3;
+    // Send the response to the client 
+    client.print(MakeHTTPHeader(sResponse.length()).c_str());
+    client.print(sResponse); sResponse="";
+    irRead = 0;
+  }
+   else if(sPath=="/On18")
+    {
      ulReqcount++;
-     Serial.println("IR Send UP");
-     irsend.sendRaw(rawDataUP,67,38);
-     sResponse  = F("<html><head><meta http-equiv=\"refresh\" content=\"0; URL=\"/IrDecoder\" /></head><body>");
+     Serial.println("comando On18");
+     irsend.sendRaw(On18,199,38);
+     sResponse  = F("<html><head><meta http-equiv=\"refresh\" content=\"0; url=/IrSender\" /></head><body>");
       client.print(MakeHTTPHeader(sResponse.length()).c_str());
       client.print(sResponse); sResponse="";
   
   }
-   else if(sPath=="/IrSendOn")
-  ///////////////////////////////////
-  // format the html page for /irDecoder 
-  ///////////////////////////////////
-  {
+  else if(sPath=="/On19")
+    {
      ulReqcount++;
-     Serial.println("Ir Send DOWN");
-    irsend.sendRaw(rawDataDOWN,67,38);
-    client.print("HTTP/1.1 200 OK\r\n");
-    delay(1);
+     Serial.println("comando On19");
+     irsend.sendRaw(On19,199,38);
+     sResponse  = F("<html><head><meta http-equiv=\"refresh\" ccontent=\"0; url=/IrSender\" /></head><body>");
+      client.print(MakeHTTPHeader(sResponse.length()).c_str());
+      client.print(sResponse); sResponse="";
+  
   }
+  else if(sPath=="/On20")
+    {
+     ulReqcount++;
+     Serial.println("comando On20");
+     irsend.sendRaw(On20,199,38);
+     sResponse  = F("<html><head><meta http-equiv=\"refresh\" content=\"0; url=/IrSender\" /></head><body>");
+      client.print(MakeHTTPHeader(sResponse.length()).c_str());
+      client.print(sResponse); sResponse="";
+  
+  }
+  else if(sPath=="/On21")
+    {
+     ulReqcount++;
+     Serial.println("comando On21");
+     irsend.sendRaw(On21,199,38);
+     sResponse  = F("<html><head><meta http-equiv=\"refresh\" content=\"0; url=/IrSender\" /></head><body>");
+      client.print(MakeHTTPHeader(sResponse.length()).c_str());
+      client.print(sResponse); sResponse="";
+  
+  }
+  else if(sPath=="/On22")
+    {
+     ulReqcount++;
+     Serial.println("comando On22");
+     irsend.sendRaw(On22,199,38);
+     sResponse  = F("<html><head><meta http-equiv=\"refresh\" content=\"0; url=/IrSender\" /></head><body>");
+      client.print(MakeHTTPHeader(sResponse.length()).c_str());
+      client.print(sResponse); sResponse="";
+  
+  }
+  else if(sPath=="/On23")
+    {
+     ulReqcount++;
+     Serial.println("comando On23");
+     irsend.sendRaw(On23,199,38);
+     sResponse  = F("<html><head><meta http-equiv=\"refresh\" content=\"0; url=/IrSender\" /></head><body>");
+      client.print(MakeHTTPHeader(sResponse.length()).c_str());
+      client.print(sResponse); sResponse="";
+  
+  }
+  else if(sPath=="/On24")
+    {
+     ulReqcount++;
+     Serial.println("comando On24");
+     irsend.sendRaw(On24,199,38);
+     sResponse  = F("<html><head><meta http-equiv=\"refresh\" content=\"0; url=/IrSender\" /></head><body>");
+      client.print(MakeHTTPHeader(sResponse.length()).c_str());
+      client.print(sResponse); sResponse="";
+  
+  }
+  else if(sPath=="/IrOFF")
+    {
+     ulReqcount++;
+     Serial.println("comando ac off");
+     irsend.sendRaw(Off,199,38);
+     sResponse  = F("<html><head><meta http-equiv=\"refresh\" content=\"0; url=/IrSender\" /></head><body>");
+      client.print(MakeHTTPHeader(sResponse.length()).c_str());
+      client.print(sResponse); sResponse="";
+  
+  }
+   
   else
   ////////////////////////////
   // 404 for non-matching path

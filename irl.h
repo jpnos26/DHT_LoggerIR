@@ -41,4 +41,32 @@ String file2=
 "</body>\r\n"
 "</html>\r\n";
 
+String file3=
+"<html>\r\n"
+"<head>\r\n"
+"  <title></title>\r\n"
+"</head>\r\n"
+"<body>\r\n"
+"<h2 style=\"text-align: center;\">Dht_Logger</h2>\r\n"
+"\r\n"
+"<h3 style=\"text-align: center;\">Invio Comadi IR</h3>\r\n"
+"\r\n"
+"<p style=\"text-align: center;\">&nbsp;Gradi <select id = \"gradi\" name=\"gradi\"><option value=\"18\">18</option><option value=\"19\">19</option><option value=\"20\">20</option><option value=\"21\">21</option><option value=\"22\">22</option><option value=\"23\">23</option><option value=\"24\">24</option><option value=\"25\">25</option><option value=\"26\">26</option></select> <input name=\"invia\" type=\"button\" value=\"Invia\" onclick=\"myFunction()\"/></p>\r\n"
+"\r\n"
+"<p style=\"text-align: center;\"><input name=\"Off\" type=\"button\" value=\"Spegni Condizionatore\" onclick=\"location.href= '/IrOFF'\" />&nbsp; <input name=\"home\" type=\"button\" value=\"Home\" onclick=\"location.href= '/'\" /></p>\r\n"
+"\r\n"
+"<p style=\"text-align: center;\">made by Jpnos 2017</p>\r\n"
+"\r\n"
+"<p style=\"text-align: center;\">&nbsp;</p>\r\n"
+"<script>\r\n"
+"function myFunction() {\r\n"
+"    var x = \"/On\" + document.getElementById(\"gradi\").value;\r\n"
+" //console.log (x);\r\n"
+"    window.location = x;\r\n"
+"}\r\n"
+"</script>\r\n"
+"</body>\r\n"
+"</html>\r\n"
+"\r\n";
+
 #endif
