@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta charset="UTF-8"> 	
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>Dht Thermostat</title>
+	<meta id="viewport" name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<script src="javascript/jquery.js"></script>
+	<script src="javascript/raphael.js"></script>
+	<script src="javascript/justgage.js"></script>
+	<link rel=stylesheet href="css/index.css">
+        <title>Wi-FI Logger per Temperatura e Umidita</title>
+        <script type="text/javascript">
+            //creo le variabili e le setto
+            var reloadPeriod = 60000;
+            var running = false;
+            //inizio la lettura da esp8266
+            $(document).ready(function() {
+                console.log("ready..... go");		
+                
+            console.log("gg1.....");
+                    var gg1 = new JustGage({
+                        id: 'gg1',
+                        value: 0,
+                        title: 'Temp °c',
+                        gaugeWidthScale: 0.8,
+                        min: 0,
+                        max: 30,
+                        donut: false,
+                        decimals:1,
+                        titleFontColor: "red",
+                        titleFontFamily: "Georgia",
+                        valueFontColor: "red",
+                        valueFontFamily: "Georgia",
+                        valueMinFontSize:50,
+                        customSectors : [{"lo":0,"hi":16,"color":"#000099"},
+                                        {"lo":17,"hi":22,"color":"#00cc00"},
+                                        {"lo":23,"hi":34,"color":"#ff3300"}],
+                        levelColorsGradient: true
+                        });
+                    console.log("gg2.....");
+                    var gg2 = new JustGage({
+                        id: "gg2",
+                        value:0,
+                        title: 'Umidita %',
+                        gaugeWidthScale: 0.8,
+                        min: 0,
+                        max: 100,
+                        donut: false,
+                        titleFontColor: "blue",
+                        titleFontFamily: "Georgia",
+                        valueFontColor: "blue",
+                        valueFontFamily: "Georgia",
+                        valueMinFontSize:30,
+                        customSectors: {
+                                percents: true,
+                                ranges: [{
+                                color : "#000099",
+                                lo : 0,
+                                hi : 50
+                                },{
+                                color : "#00cc00",
+                                lo : 51,
+                                hi : 80
+                                },{
+                                color : "#ff3300",
+                                lo : 51,
+                                hi : 80
+                                }]
+                        },
+                        levelColorsGradient: false
+                    });
+                    var gg3 = new JustGage({
+                        id: "gg3",
+                        value:0,
+                        title: 'P. Atm. mbar',
+                        gaugeWidthScale: 0.8,
+                        min: 960,
+                        max: 1060,
+                        donut: false,
+                        titleFontColor: "green",
+                        titleFontFamily: "Georgia",
+                        valueFontColor: "green",
+                        valueFontFamily: "Georgia",
+                        valueMinFontSize:10,
+                        customSectors: {
+                                percents: true,
+                                ranges: [{
+                                color : "#000099",
+                                lo : 960,
+                                hi : 1000
+                                },{
+                                color : "#00cc00",
+                                lo : 1001,
+                                hi : 1007
+                                },{
+                                color : "#ff3300",
+                                lo : 1008,
+                                hi : 1060
+                                }]
+                        },
+                        levelColorsGradient: false
+                    });
+            run()
+            function loadValues(){
+            //if(!running) return;
+                console.log("loadvalues is running......");
+                var xh = new XMLHttpRequest();
+                console.log(xh)
+                xh.onreadystatechange = function(){
+                if (xh.readyState == 4){
+                    if(xh.status == 200) {
+                        console.log("Entrati",xh.responseText);
+                        var res = JSON.parse(xh.responseText);
+                        console.log(res);
+                        document.getElementById ("intesta").innerHTML = res.S_hostname;
+                        gg1.refresh(parseFloat(res.S_temperature).toFixed(1));
+                        gg2.refresh(parseFloat(res.S_humidity).toFixed(0));
+                        gg3.refresh(parseFloat(res.S_pressure).toFixed(1));
+                        document.getElementById ("lettura").innerHTML = "Lettura : "+ res.S_time;
+                        document.getElementById ("stato").innerHTML = "Stato : "+ res.S_relestatus;
+                        console.log("reloadPeriod -......",reloadPeriod);
+                        setTimeout(loadValues, reloadPeriod);
+                    } else running = false;
+                    }
+                };
+                xh.open("GET", "/dati", true);
+                xh.send(null);
+                };
+            function run(){
+                if(!running){
+                    running = true;
+                    console.log("running.....");
+                    // creo la data
+                    var data = new Date();
+                    var gg,gg1,mm1, mm, aaaa;
+                    gg = data.getDate()
+                    if (gg<10) {
+                        gg1="0"+gg+ "/";
+                        }
+                    else{
+                        gg1 = gg+"/";
+                        }
+                    mm = data.getMonth()+1; 
+                    if (mm<10){
+                        mm1 = "0"+mm+ "/";
+                        }
+                    else{
+                        mm1 = mm+"/";
+                        }
+                    aaaa = data.getFullYear();
+                    /*gg1.refresh(34.1);
+                    gg2.refresh(76);*/
+                    document.getElementById("oggi").innerHTML =  gg1 + mm1 + aaaa;/*
+                    document.getElementById ("lettura").innerHTML = "Lettura : 13/02/2018";
+                    document.getElementById ("stato").innerHTML = "Stato : All OFF";
+                    elem = document.getElementById ("intesta").innerHTML = "ECCOCI";
+                    //inizializzo la rilettura
+                    console.log("load Values -......");*/
+                    loadValues();		
+                    }
+                }
+       });
+       function Popup() 
+        {
+            var temper = prompt("Inserire Temperatura Zona", "20.0");
+            if (temper == null || temper <= 18 || temper >=25) {
+                console.log ("User cancelled the prompt.");
+            } else {
+                console.log("Hello " + temper + "! How are you today?");
+                window.location.href="/zoneON?"+temper;
+            }
+        }
+</script>
+</head>
+<body bgcolor = "#d0d0f0" >
+    <div style = "font-size:26px; font-weight:bold;height:30px">
+        <p id="intesta" >Wifi Logger</p>
+    </div>
+    <div id="date" >
+        <table>
+            <tr>
+                <td width="50%">
+                    <p style="font-weight:bold" id="oggi">data</p>
+                </td>
+                <td width="50%">
+                    <p id ="lettura"> Ultima Lettura alle 10</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="drop-menu">
+        <ul id="menu">
+                <li><a href="/clear">Clear</a></li>
+                <li><a href="#">Condizionatore</a>
+                        <ul>
+                                <li><a href="#">Ricevi IR</a>
+                                <ul>
+                                    <li><a href="/irDecoder?102">ON</a></li>
+                                    <li><a href="/irDecoder?101">OFF</a></li>
+                                </ul>
+                                <li><a href="#">Invia IR</a>
+                                <ul>
+                                    <li><a href="/irSender?99">Spegni</a></li>
+                                    <li><a href="/irSender?20">20 °c</a></li>
+                                    <li><a href="/irSender?21">21 °c</a></li>
+                                    <li><a href="/irSender?22">22 °c</a></li>
+                                    <li><a href="/irSender?23">23 °c</a></li>
+                                    <li><a href="/irSender?24">24 °c</a></li>
+                                    <li><a href="/irSender?25">25 °c</a></li>
+                                    <li><a href="/irSender?26">26 °c</a></li>
+                                </ul>              
+                        </ul>
+                
+                <li><a href="#">Zona</a>
+                    <ul>
+                        <li><a href="javascript:Popup()">ON</a></li>
+                        <li><a href="/zoneOFF">OFF</a></li>
+                    </ul>
+                </li>
+                <li><a href="./graph.html">Grafico</a></li>
+        </ul>
+    </div><br><br><br><br>
+    <div id="corpo" class="corpo" >
+        <table  width="100%" table border="0">
+            <tr>
+                <td >
+                    <div id="gg2" class="gauge"  ></div>
+                </td>
+                <td>
+                    <div id="gg3" class="gauge"  ></div>
+                </td>
+            </tr>
+            <tr>
+                <td width="50%">
+                </td>
+                <td width="50%">
+                    <div id="gg1" class="gauge"  ></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <p id ="stato">Stato: All OFF</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

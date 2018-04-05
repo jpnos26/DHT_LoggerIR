@@ -10,3 +10,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OU
 SOFTWARE.**
 
 -
+Tabella Connessioni 
+Rele		:   		GpIo14 	- NodeMCU D5
+Display SCL 	: 		GpIO5	- NodeMCU D1
+Display SDA 	: 		GpIO4	- NodeMCU D2
+Ir Decoder	:		GpIo13  - NodeMCU D7
+Ir Sender	:		Gpio12  - NodeMCU D6
+DHT22		:		Gpio0	- NodeMCU D3
+

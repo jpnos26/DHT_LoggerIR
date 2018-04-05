@@ -33,5 +33,9 @@ unsigned long sendNTPpacket(IPAddress& address);
 unsigned int date_time_to_epoch(date_time_t* date_time);
 void epoch_to_date_time(date_time_t* date_time,unsigned int epoch);
 String epoch_to_string(unsigned int epoch);
-
+String epoch_to_time(unsigned int epoch);
+String epoch_to_date(unsigned int epoch);
+String epoch_to_hour(unsigned int epoch);
+String epoch_to_string_web(unsigned int epoch);
 #endif
+

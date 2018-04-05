@@ -1,0 +1,305 @@
+<!DOCTYPE html >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta charset="UTF-8"> 	
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>Dht Thermostat</title>
+	<meta id="viewport" name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<script src="javascript/jquery.js"></script>
+	<script src="javascript/gauge.min.js"></script>
+	<link rel=stylesheet href="css/index.css">
+        <title>Wi-FI Logger per Temperatura e Umidita</title>
+        <script type="text/javascript">
+            //creo le variabili e le setto
+            var reloadPeriod = 60000;
+            var running = false;
+            //inizio la lettura da esp8266
+            $(document).ready(function() {
+                console.log("ready..... go");
+                var tempGauge = new LinearGauge({
+                        renderTo: 'gauge-temp',
+                        borders:false,
+                        borderOuterWidth:0,
+                        borderShadowWidth:0,
+                        fontUnitsSize:45,
+                        fontNumbersSize:45,
+                        fontTitleSize:50,
+                        fontValueSize:40,
+                        valueInt:2,
+                        valueDec:1, 
+                        barBeginCircle: 35,
+                        barLength:95,
+                        valueBox:true,
+                        width: 100,
+                        height: 500,
+                        units: '°c',
+                        title: 'Temp.°c',
+                        value: 0,
+                        minValue: -5,
+                        maxValue: 50,
+                        majorTicks: [
+                                '-5','0','5','10','15','20','25','30','35','40','45','50'
+                                ],
+                        minorTicks: 2,
+                        strokeTicks: false,
+                        highlights: [
+                                { from: -5, to: 0, color: 'rgba(0,0,204,1)' },
+                                { from: 0, to: 16, color: 'rgba(179,179,255,1)' },
+                                { from: 16, to: 25, color: 'rgba(51,204,51,1)' },
+                                { from: 25, to: 50, color: 'rgba(255,26,26,1)' },
+                                ],
+                        colorPlate: '#d0d0f0',
+                        colorMajorTicks: '#0000cc',
+                        colorMinorTicks: '#0000cc',
+                        colorTitle: '#FF0022',
+                        colorValueText:'#FF0022',
+                        colorUnits: '#ccc',
+                        colorNumbers: '#0000cc',
+                        colorNeedle: 'rgba(20, 0, 0, 1)',
+                        colorNeedleEnd: 'rgba(255, 160, 122, .9)',
+                        colorValueBoxBackground: '#d0d0f0',
+                        animationRule: 'bounce',
+                        animationDuration: 1000,
+                        
+                });
+                var umGauge = new LinearGauge({
+                        renderTo: 'gauge-press',
+                        borders:false,
+                        borderOuterWidth:0,
+                        borderShadowWidth:0,
+                        fontUnitsSize:35,
+                        fontNumbersSize:35,
+                        fontTitleSize:40,
+                        fontValueSize:35,
+                        valueInt:3,
+                        valueDec:0, 
+                        barBeginCircle: 0,
+                        valueBox:true,
+                        tickSide: 'right',
+                        needleSide:'right',
+                        numberSide:'right',
+                        width: 80,
+                        height: 450,
+                        units: '%',
+                        title: 'Umidita %',
+                        value: 0,
+                        minValue: 0,
+                        maxValue: 100,
+                        majorTicks: [
+                                '0','20','40','60','80','100'
+                                ],
+                        minorTicks: 2,
+                        strokeTicks: false,
+                        highlights: [
+                                { from: 0, to: 50, color: 'rgba(179,179,255,1)' },
+                                { from: 51, to: 80, color: 'rgba(51,204,51,1)' },
+                                { from: 81, to: 100, color: 'rgba(255,26,26,1)' },
+                                ],
+                        colorPlate: '#d0d0f0',
+                        colorMajorTicks: '#0000cc',
+                        colorMinorTicks: '#0000cc',
+                        colorTitle: '#1a1aff',
+                        colorValueText:'#1a1aff',
+                        colorUnits: '#ccc',
+                        colorNumbers: '#0000cc',
+                        colorNeedle: 'rgba(10, 0, 0, 1)',
+                        colorNeedleEnd: 'rgba(255, 160, 122, .9)',
+                        colorValueBoxBackground: '#d0d0f0',
+                        animationRule: 'bounce',
+                        animationDuration: 1000,
+                        
+                });
+                var pressGauge = new LinearGauge({
+                        renderTo: 'gauge-um',
+                        borders:false,
+                        borderOuterWidth:0,
+                        borderShadowWidth:0,
+                        fontUnitsSize:25,
+                        fontNumbersSize:25,
+                        fontTitleSize:40,
+                        fontValueSize:35,
+                        valueInt:4,
+                        valueDec:1, 
+                        barBeginCircle: 0,
+                        tickSide: 'left',
+                        needleSide:'left',
+                        numberSide:'left',
+                        valueBox:true,
+                        width: 80,
+                        height: 450,
+                        units: 'mbar',
+                        title: 'P. Atm. mbar',
+                        value: 0,
+                        minValue: 960,
+                        maxValue: 1060,
+                        majorTicks: [
+                                '960','980','1000','1020','1040','1060'
+                                ],
+                        minorTicks: 2,
+                        strokeTicks: false,
+                        highlights: [
+                                { from: 960, to: 1000, color: 'rgba(179,179,255,1)' },
+                                { from: 1001, to: 1020, color: 'rgba(51,204,51,1)' },
+                                { from: 1021, to: 1060, color: 'rgba(255,26,26,1)' },
+                                ],
+                        colorPlate: '#d0d0f0',
+                        colorMajorTicks: '#0000cc',
+                        colorMinorTicks: '#0000cc',
+                        colorTitle: '#009900',
+                        colorValueText:'#009900',
+                        colorUnits: '#ccc',
+                        colorNumbers: '#0000cc',
+                        colorNeedle: 'rgba(20, 0, 0, 1)',
+                        colorNeedleEnd: 'rgba(255, 160, 122, .9)',
+                        colorValueBoxBackground: '#d0d0f0',
+                        animationRule: 'bounce',
+                        animationDuration: 1000,
+                        
+                });
+                run()
+            function loadValues(){
+            //if(!running) return;
+                console.log("loadvalues is running......");
+                var xh = new XMLHttpRequest();
+                console.log(xh)
+                xh.onreadystatechange = function(){
+                if (xh.readyState == 4){
+                    if(xh.status == 200) {
+                        console.log("Entrati",xh.responseText);
+                        var res = JSON.parse(xh.responseText);
+                        console.log(res);
+                        document.getElementById ("intesta").innerHTML = res.S_hostname;
+                        tempGauge.value=res.S_temperature.toFixed(1);
+                        umGauge.value=value =res.S_humidity.toFixed(0);
+                        pressGauge.value=res.S_pressure.toFixed(1);
+                        document.getElementById ("lettura").innerHTML = "Lettura : "+ res.S_time;
+                        document.getElementById ("stato").innerHTML = "Stato : "+ res.S_relestatus;
+                        console.log("reloadPeriod -......",reloadPeriod);
+                        setTimeout(loadValues, reloadPeriod);
+                    } else running = false;
+                    }
+                };
+                xh.open("GET", "/dati", true);
+                xh.send(null);
+                };
+            function run(){
+                if(!running){
+                    running = true;
+                    console.log("running.....");
+                    // creo la data
+                    var data = new Date();
+                    var gg,gg1,mm1, mm, aaaa;
+                    gg = data.getDate()
+                    if (gg<10) {
+                        gg1="0"+gg+ "/";
+                        }
+                    else{
+                        gg1 = gg+"/";
+                        }
+                    mm = data.getMonth()+1; 
+                    if (mm<10){
+                        mm1 = "0"+mm+ "/";
+                        }
+                    else{
+                        mm1 = mm+"/";
+                        }
+                    aaaa = data.getFullYear();
+                    /*gg1.refresh(34.1);
+                    gg2.refresh(76);*/
+                    document.getElementById("oggi").innerHTML =  gg1 + mm1 + aaaa;
+                    /*
+                    document.getElementById ("GaugeMeter_2").value =65;
+                    document.getElementById ("GaugeMeter_3").value =1002;
+                    //inizializzo la rilettura
+                    console.log("load Values -......");*/
+                    loadValues();
+                    tempGauge.draw();
+                    umGauge.draw();
+                    pressGauge.draw();
+                    }
+                }
+       });
+       function Popup() 
+        {
+            var temper = prompt("Inserire Temperatura Zona", "20.0");
+            if (temper == null || temper <= 18 || temper >=25) {
+                console.log ("User cancelled the prompt.");
+            } else {
+                console.log("Hello " + temper + "! How are you today?");
+                window.location.href="/zoneON?"+temper;
+            }
+        }
+</script>
+</head>
+<body bgcolor = "#d0d0f0" >
+    <div style = "font-size:26px; font-weight:bold;height:30px">
+        <p id="intesta" >Wifi Logger</p>
+    </div>
+    <div id="date" >
+        <table>
+            <tr>
+                <td width="50%">
+                    <p style="font-weight:bold" id="oggi">data</p>
+                </td>
+                <td width="50%">
+                    <p id ="lettura"> Ultima Lettura alle 10</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="drop-menu">
+        <ul id="menu">
+                <li><a href="/clear">Clear</a></li>
+                <li><a href="#">Condizionatore</a>
+                        <ul>
+                                <li><a href="#">Ricevi IR</a>
+                                <ul>
+                                    <li><a href="/irDecoder?102">ON</a></li>
+                                    <li><a href="/irDecoder?101">OFF</a></li>
+                                </ul>
+                                <li><a href="#">Invia IR</a>
+                                <ul>
+                                    <li><a href="/irSender?99">Spegni</a></li>
+                                    <li><a href="/irSender?20">20 °c</a></li>
+                                    <li><a href="/irSender?21">21 °c</a></li>
+                                    <li><a href="/irSender?22">22 °c</a></li>
+                                    <li><a href="/irSender?23">23 °c</a></li>
+                                    <li><a href="/irSender?24">24 °c</a></li>
+                                    <li><a href="/irSender?25">25 °c</a></li>
+                                    <li><a href="/irSender?26">26 °c</a></li>
+                                </ul>              
+                        </ul>
+                
+                <li><a href="#">Zona</a>
+                    <ul>
+                        <li><a href="javascript:Popup()">ON</a></li>
+                        <li><a href="/zoneOFF">OFF</a></li>
+                    </ul>
+                </li>
+                <li><a href="./graph.html">Grafico</a></li>
+        </ul>
+    </div><br><br>
+    <div id="corpo" class="corpo" >
+        <table  width="100%" table border="0">
+            <tr>
+                <td width="33%" align="center" text-align="center">
+                     <div><canvas id="gauge-um"></canvas> </div>
+                </td>
+                <td width="33%" align="center" text-align="center">
+                    <div ><canvas id="gauge-temp"></canvas></div>
+                </td>
+                <td width="33%" align="center" text-align="center">
+                    <div ><canvas id="gauge-press"></canvas></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <p id ="stato">Stato: All OFF</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script>
+</script>
+</body>
+</html>

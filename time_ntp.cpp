@@ -12,14 +12,17 @@ code for time conversion based on http://stackoverflow.com/
 // note: all timing relates to 01.01.2000
 
 #include "time_ntp.h"
+#include <ESP8266WiFi.h>
 
 // NTP specifics
-IPAddress timeServer(193,204,114,105); // time.nist.gov NTP server
+const char* ntpServerName = "0.pool.ntp.org"; //server NTP
+IPAddress timeServerIP; 
 WiFiUDP udp;  // A UDP instance to let us send and receive packets over UDP
 unsigned int ntpPort = 2390;          // local port to listen for UDP packets
 const int NTP_PACKET_SIZE = 48;       // NTP time stamp is in the first 48 bytes of the message
 byte packetBuffer[ NTP_PACKET_SIZE];  //buffer to hold incoming and outgoing packets
-unsigned int tzonetemp = 1 ;		  // zone time add your time zone
+unsigned int tzonetemp = 2 ;		  // zone time add your time zone
+ 
 
 static unsigned short days[4][12] =
 {
@@ -45,18 +48,17 @@ unsigned int date_time_to_epoch(date_time_t* date_time)
 unsigned long getNTPTimestamp()
 {
   unsigned long ulSecs2000;
-  
+  Serial.print("Iniziamo : " );Serial.print ( "\n");
   udp.begin(ntpPort);
-  int cb, count=0;
-  do
-  {
-    sendNTPpacket(timeServer); // send an NTP packet to a time server
-    delay(1000);
-    cb = udp.parsePacket();
-    count++;
-  }while (!cb || count>10);
-
-  if(!cb)
+  int cb = 0;
+  WiFi.hostByName(ntpServerName, timeServerIP);
+  Serial.print("ip timeserver : ");Serial.print(String(ntpServerName));Serial.print ( "\n");
+  sendNTPpacket(timeServerIP); // send an NTP packet to a time server
+  delay(1000);
+  cb = udp.parsePacket();
+  Serial.print("Ricevuto da NTP : " );
+  Serial.println(cb);
+  if(cb == 0 )
   {
     Serial.println("Timeserver not accessible! - No RTC support!"); 
     ulSecs2000=0;
@@ -77,8 +79,10 @@ unsigned long getNTPTimestamp()
     ulSecs2000  = highWord << 16 | lowWord;
     ulSecs2000 -= 2208988800UL; // go from 1900 to 1970
     ulSecs2000 -= 946684800UL; // go from 1970 to 2000
-	ulSecs2000 += (tzonetemp * 3600); //Add Timezone
+	  ulSecs2000 += (tzonetemp * 3600); //Add Timezone
   }    
+  Serial.println("ulSecs2000:");
+  Serial.println(ulSecs2000);
   return(ulSecs2000);
 }
 
@@ -136,14 +140,12 @@ void epoch_to_date_time(date_time_t* date_time,unsigned int epoch)
     date_time->month = month+1;
     date_time->day   = epoch-days[year][month]+1;
 }
-
 String epoch_to_string(unsigned int epoch)
 {
   date_time_t date_time;
   epoch_to_date_time(&date_time,epoch);
   String s;
   int i;
-  
   s = date_time.hour; 
   s+= ":";
   i=date_time.minute;
@@ -162,4 +164,64 @@ String epoch_to_string(unsigned int epoch)
   
   return(s);
 }
+
+String epoch_to_time(unsigned int epoch)
+{
+  date_time_t date_time;
+  epoch_to_date_time(&date_time,epoch);
+  String s;
+  int i;
+  
+  s = date_time.hour; 
+  s+= ":";
+  i=date_time.minute;
+  if (i<10) {s+= "0";}
+  s+= i;
+  return(s);
+}
+String epoch_to_hour(unsigned int epoch)
+{
+  date_time_t date_time;
+  epoch_to_date_time(&date_time,epoch);
+  String s;  
+  s = date_time.hour; 
+  return(s);
+}
+String epoch_to_date(unsigned int epoch)
+{
+  date_time_t date_time;
+  epoch_to_date_time(&date_time,epoch);
+  String s;
+  int i;
+  s= date_time.day;
+  s+= ".";
+  s+= date_time.month;
+  s+= ".";
+  s+= 2000+(int)date_time.year;
+  return(s);
+}
+String epoch_to_string_web(unsigned int epoch)
+{
+  date_time_t date_time;
+  epoch_to_date_time(&date_time,epoch);
+  String s;
+  int i;
+  s= 2000+(int)date_time.year;
+  s+= "/";
+  s+= date_time.month;
+  s+= "/";
+  s+= date_time.day;
+  s+= " ";
+  s+= date_time.hour; 
+  s+= ":";
+  i=date_time.minute;
+  if (i<10) {s+= "0";}
+  s+= i;
+  s+= ":";
+  i=date_time.second;
+  if (i<10) {s+= "0";}
+  s+= i;
+  return(s);
+}
+
 
